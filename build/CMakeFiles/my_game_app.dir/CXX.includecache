@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/andrew/Documents/Projects/SGD-PJATK/src/main.cpp
+SDL2/SDL.h
+-
+chrono
+-
+cstdint
+-
+iostream
+-
+memory
+-
+set
+-
+stdexcept
+-
+string
+-
+thread
+-
+tuple
+-
+vector
+-
+

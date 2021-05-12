@@ -77,7 +77,6 @@ int main(int, char **) {
     x+=0.6;
     y = sin(0.1*x/M_PI)*200+240;
 
-
     SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
     SDL_RenderDrawLineF(renderer.get(), x, y, px, py);
 
