@@ -1,4 +1,0 @@
-/home/andrew/Documents/Projects/SGD-PJATK/build/CMakeFiles/rebuild_cache.dir
-/home/andrew/Documents/Projects/SGD-PJATK/build/CMakeFiles/edit_cache.dir
-/home/andrew/Documents/Projects/SGD-PJATK/build/CMakeFiles/run.dir
-/home/andrew/Documents/Projects/SGD-PJATK/build/CMakeFiles/my_game_app.dir

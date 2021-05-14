@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -Wextra -std=c++11 -pthread -O3  -rdynamic CMakeFiles/my_game_app.dir/src/main.cpp.o  -o my_game_app  -lSDL2 
