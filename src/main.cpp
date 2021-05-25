@@ -6,18 +6,13 @@
 
 #include <SDL2/SDL.h>
 #include <chrono>
-#include <cstdint>
 #include <iostream>
-#include <memory>
-#include <set>
-#include <stdexcept>
-#include <string>
 #include <thread>
-#include <tuple>
-#include <vector>
+#include "Pallete.hpp"
+#include "Ball.hpp"
 
-#define HEIGHT 640
-#define WIDTH 480
+#define WIDTH 1280
+#define HEIGHT 720
 
 // check for errors
 #define errcheck(e)                                                            \
@@ -33,14 +28,12 @@ int main(int, char **) {
   using namespace std;
   using namespace std::chrono;
 
-  errcheck(SDL_Init(SDL_INIT_VIDEO) != 0);
+  errcheck(SDL_Init(SDL_INIT_EVERYTHING) != 0);
 
   shared_ptr<SDL_Window> window(SDL_CreateWindow("Pong SDL2 LEEEETS GOOOOO",
                                                  SDL_WINDOWPOS_UNDEFINED,
-                                                 SDL_WINDOWPOS_UNDEFINED,
-                                                 HEIGHT,
-                                                 WIDTH,
-                                                 SDL_WINDOW_SHOWN),
+                                                 SDL_WINDOWPOS_UNDEFINED, WIDTH,
+                                                 HEIGHT, SDL_WINDOW_SHOWN),
                                 [](SDL_Window *p) { SDL_DestroyWindow(p); });
   errcheck(window == nullptr);
 
@@ -56,8 +49,6 @@ int main(int, char **) {
 
   steady_clock::time_point current_time =
       steady_clock::now(); // remember current time
-      int x=0,y=0;
-      bool point_active = false;
   for (bool game_active = true; game_active;) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) { // check if there are some events
@@ -65,54 +56,21 @@ int main(int, char **) {
       case SDL_QUIT:
         game_active = false;
         break;
-        case SDL_KEYDOWN:
-          if (event.key.keysym.sym == SDLK_ESCAPE) game_active = false;
-          if(event.key.keysym.sym == SDLK_RIGHT && point_active){
-            x+=1;
-            SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
-            SDL_RenderClear(renderer.get());
-            SDL_SetRenderDrawColor(renderer.get(), 255, 255, 255, 255);
-            SDL_RenderDrawPoint(renderer.get(), x, y);
-          }
-          if(event.key.keysym.sym == SDLK_LEFT && point_active){
-            x-=1;
-            SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
-            SDL_RenderClear(renderer.get());
-            SDL_SetRenderDrawColor(renderer.get(), 255, 255, 255, 255);
-            SDL_RenderDrawPoint(renderer.get(), x, y);
-          }
-          if(event.key.keysym.sym == SDLK_UP && point_active){
-            y-=1;
-            SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
-            SDL_RenderClear(renderer.get());
-            SDL_SetRenderDrawColor(renderer.get(), 255, 255, 255, 255);
-            SDL_RenderDrawPoint(renderer.get(), x, y);
-          }
-          if(event.key.keysym.sym == SDLK_DOWN && point_active){
-            y+=1;
-            SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
-            SDL_RenderClear(renderer.get());
-            SDL_SetRenderDrawColor(renderer.get(), 255, 255, 255, 255);
-            SDL_RenderDrawPoint(renderer.get(), x, y);
-          }
-          break;
-        case SDL_MOUSEBUTTONDOWN:
-          SDL_GetMouseState(&x, &y);
-          SDL_SetRenderDrawColor(renderer.get(), 255, 255, 255, 255);
-          SDL_RenderDrawPoint(renderer.get(), x, y);
-          point_active = true;
-          break;
+      case SDL_KEYDOWN:
+        if (event.key.keysym.sym == SDLK_ESCAPE)
+          game_active = false;
       }
     }
 
-    // double x = 0, y = 240;
-    // double px = x, py = y;
-    //
-    // x += 0.6;
-    // y = sin(0.1 * x / M_PI) * 200 + 240;
-    //
-    // SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
-    // SDL_RenderDrawLineF(renderer.get(), x, y, px, py);
+    SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 0);
+    SDL_RenderClear(renderer.get());
+
+    Pallete player1 = Pallete(renderer.get(), {20, HEIGHT / 2, 20, 100});
+    Pallete player2 = Pallete(renderer.get(), {WIDTH - 40, HEIGHT / 2, 20, 100});
+    Ball ball = Ball(renderer.get());
+    player1.Render();
+    player2.Render();
+    ball.Render();
 
     SDL_RenderPresent(renderer.get()); // draw frame to screen
 
