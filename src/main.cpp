@@ -10,11 +10,15 @@
 #include "Pallete.hpp"
 #include "Ball.hpp"
 
+#include <math.h>
+
 #define WIDTH 1280
 #define HEIGHT 720
-#define FONT_SIZE 32
+#define FONT_SIZE 64
 
 using namespace std;
+
+bool debug = false;
 
 int frameCount, timerFPS, lastFrame, fps;
 SDL_Window* window;
@@ -30,6 +34,24 @@ SDL_Rect test1;
 string score;
 int score_1=0, score_2=0;
 bool turn;
+
+void serve(Pallete *player1, Pallete *player2, Ball *ball){
+  // player1->set_position(HEIGHT / 2);
+  // player2->set_position(HEIGHT / 2);
+  //
+  // if(turn){
+  //   ball->set_Center({80, HEIGHT / 2});
+  //   ball->set_Velocity(10, 0);
+  // }
+  // else{
+  //   ball->set_Center({WIDTH - 60, HEIGHT / 2});
+  //   ball->set_Velocity(-10, 0);
+  // }
+  // turn=!turn;
+
+  ball->set_Center({WIDTH / 2, HEIGHT / 2});
+  ball->set_Velocity(10, 0);
+}
 
 
 void write(string text, int x, int y){
@@ -52,9 +74,9 @@ void write(string text, int x, int y){
 }
 
 
-void render(Pallete player1, Pallete player2, Ball ball){
+void render(Pallete *player1, Pallete *player2, Ball *ball){
   SDL_SetRenderDrawColor(renderer, 0,0,0,255);
-  SDL_RenderClear(renderer);
+  if(!debug) SDL_RenderClear(renderer);
 
   frameCount++;
   timerFPS = SDL_GetTicks()-lastFrame;
@@ -64,26 +86,66 @@ void render(Pallete player1, Pallete player2, Ball ball){
 
   SDL_SetRenderDrawColor(renderer, 255,255,255,255);
 
-  player1.Render();
-  player2.Render();
-  ball.Render();
+  player1->Render();
+  player2->Render();
+  ball->Render();
 
-  write(score, WIDTH/2+FONT_SIZE, FONT_SIZE*2);
+  write(score, WIDTH/2+FONT_SIZE, FONT_SIZE);
 
   SDL_RenderPresent(renderer);
 }
 
-void update(){
+void update(Pallete *player1, Pallete *player2, Ball *ball, SDL_Renderer *renderer){
+
+  SDL_Rect ball_hitbox = {ball->get_Center().x - ball->get_Radius(), ball->get_Center().y - ball->get_Radius(), ball->get_Radius()*2, ball->get_Radius()*2};
+  SDL_Rect player1_hitbox = player1->get_Rect();
+  SDL_Rect player2_hitbox = player2->get_Rect();
+
+  if(debug){
+  SDL_SetRenderDrawColor(renderer, 0,255,0,255);
+  SDL_RenderFillRect(renderer, &ball_hitbox);
+  }
+
+  double VelX = 0;
+  double VelY = 0;
+
+  if(SDL_HasIntersection(&ball_hitbox, &player1_hitbox)){
+    double rel = (player1_hitbox.y+(player1_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
+    double norm = rel/(player1_hitbox.h/2);
+    double bounce = norm*(5*M_PI/2);
+    VelX = ball->get_Velocity_x()*cos(bounce);
+    VelY = ball->get_Velocity_y()*-sin(bounce);
+  }
+
+  if(SDL_HasIntersection(&ball_hitbox, &player2_hitbox)){
+    double rel = (player2_hitbox.y+(player2_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
+    double norm = rel/(player2_hitbox.h/2);
+    double bounce = norm*(5*M_PI/2);
+    VelX = -ball->get_Velocity_x()*cos(bounce);
+    VelY = ball->get_Velocity_y()*-sin(bounce);
+  }
+
+
   score = to_string(score_1) + "  " + to_string(score_2);
+  if(ball->get_X()==0) {score_1++; serve(player1, player2, ball);}
+  if(ball->get_X() + ball->get_Radius() == WIDTH) {score_2++; serve(player1, player2, ball);}
+  if(ball->get_Y()==0) ball->Bounce_Y();
+  if(ball->get_Y() + ball->get_Radius() == HEIGHT) ball->Bounce_Y();
+
+
+  ball->set_Center({ball->get_Center().x+VelX, ball->get_Center().y+VelY});
+
 }
 
-void input(){
+void input(Pallete *player1, Pallete *player2){
   SDL_Event e;
   const Uint8 *keystates = SDL_GetKeyboardState(NULL);
   while(SDL_PollEvent(&e)) if(e.type==SDL_QUIT) running=false;
   if(keystates[SDL_SCANCODE_ESCAPE]) running=false;
-  if(keystates[SDL_SCANCODE_UP]);
-  if(keystates[SDL_SCANCODE_DOWN]);
+  if(keystates[SDL_SCANCODE_UP]) player2->move_Up();
+  if(keystates[SDL_SCANCODE_DOWN]) player2->move_Down();
+  if(keystates[SDL_SCANCODE_W]) player1->move_Up();
+  if(keystates[SDL_SCANCODE_S]) player1->move_Down();
 }
 
 
@@ -112,31 +174,16 @@ int main(int, char **) {
         frameCount = 0;
       }
 
-      update();
-      input();
-      render(player1, player2, ball);
+      serve(&player1, &player2, &ball);
+      update(&player1, &player2, &ball, renderer);
+      input(&player1, &player2);
+      render(&player1, &player2, &ball);
+
     }
     TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
-
-
-  //
-  // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-  // SDL_RenderClear(renderer);
-  //
-  // Pallete player1 = Pallete(renderer, {20, HEIGHT / 2, 20, 100});
-  // Pallete player2 = Pallete(renderer, {WIDTH - 40, HEIGHT / 2, 20, 100});
-  // Ball ball = Ball(renderer);
-  // player1.Render();
-  // player2.Render();
-  // ball.Render();
-  //
-  // SDL_RenderPresent(renderer); // draw frame to screen
-
-    // this_thread::sleep_until(current_time = current_time + dt);
-  //}
 
 }

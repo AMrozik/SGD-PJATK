@@ -29,6 +29,13 @@ public:
     this->x = x;
     this->y = y;
   }
+
+  void reverse_X(){
+    this->x = -this->x;
+  }
+  void reverse_Y(){
+    this->y = -this->y;
+  }
 };
 
 
@@ -67,7 +74,6 @@ public:
   }
 
 
-///// do i need to manually delete something?
   ~Ball(){
     SDL_DestroyRenderer(this->renderer);
   }
@@ -91,6 +97,18 @@ public:
     return this->center;
   }
 
+  int get_X(){
+    return this->center.x;
+  }
+
+  int get_Y(){
+    return this->center.y;
+  }
+
+  int get_Radius(){
+    return this->radius;
+  }
+
 
 /////// setters
   void set_Velocity(double x, double y){
@@ -108,6 +126,17 @@ public:
 
   void set_Radius(int r){
     this->radius = r;
+  }
+
+
+
+
+  void Bounce_X(){
+    this->velocity.reverse_X();
+  }
+
+  void Bounce_Y(){
+    this->velocity.reverse_Y();
   }
 
 
