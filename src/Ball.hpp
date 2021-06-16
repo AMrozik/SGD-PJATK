@@ -43,7 +43,7 @@ public:
 class Ball{
 
 private:
-  Vector2f velocity = Vector2f(0,0);
+  Vector2f velocity = Vector2f(10,5);
   SDL_Color color = {255, 255, 255, 255}; //RGBA
   SDL_Point center = {WIDTH / 2, HEIGHT / 2};
   int radius = 10;
@@ -137,6 +137,13 @@ public:
 
   void Bounce_Y(){
     this->velocity.reverse_Y();
+  }
+
+  void Move(){
+    this->center = {
+      this->center.x + this->velocity.x,
+      this->center.y + this->velocity.y
+    };
   }
 
 

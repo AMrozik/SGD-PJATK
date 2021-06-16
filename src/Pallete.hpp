@@ -69,6 +69,7 @@ public:
 
 
   void move_Down(){
+    
     this->rect.y+=this->velocity;
     if(this->rect.y + this->rect.h > HEIGHT) this->rect.y = HEIGHT - this->rect.h;
   }

@@ -18,7 +18,7 @@
 
 using namespace std;
 
-bool debug = false;
+bool debug = true;
 
 int frameCount, timerFPS, lastFrame, fps;
 SDL_Window* window;
@@ -26,31 +26,33 @@ SDL_Renderer* renderer;
 TTF_Font* font;
 SDL_Color color;
 
+bool has_winner = false;
+
 bool running;
 
 SDL_Rect score_board;
 SDL_Rect test1;
 
 string score;
-int score_1=0, score_2=0;
+int score_1=9, score_2=0;
 bool turn;
 
-void serve(Pallete *player1, Pallete *player2, Ball *ball){
+
+void serve(Pallete *player1, Pallete *player2, Ball *ball, bool turn){
   // player1->set_position(HEIGHT / 2);
   // player2->set_position(HEIGHT / 2);
-  //
-  // if(turn){
-  //   ball->set_Center({80, HEIGHT / 2});
-  //   ball->set_Velocity(10, 0);
-  // }
-  // else{
-  //   ball->set_Center({WIDTH - 60, HEIGHT / 2});
-  //   ball->set_Velocity(-10, 0);
-  // }
-  // turn=!turn;
 
-  ball->set_Center({WIDTH / 2, HEIGHT / 2});
-  ball->set_Velocity(10, 0);
+  if(turn){
+    ball->set_Center({80, player1->get_Rect().y + player1->get_Rect().h/2});
+    ball->set_Velocity(10, 0);
+  }
+  else{
+    ball->set_Center({WIDTH - 60, player2->get_Rect().y+ player1->get_Rect().h/2});
+    ball->set_Velocity(-10, 0);
+  }
+
+  // ball->set_Center({WIDTH / 2, HEIGHT / 2});
+  // ball->set_Velocity(10, -5);
 }
 
 
@@ -71,6 +73,31 @@ void write(string text, int x, int y){
 
   SDL_FreeSurface(surface);
   SDL_RenderCopy(renderer, texture, NULL, &score_board);
+}
+
+void check_winner(Pallete *player1, Pallete *player2, Ball *ball, bool turn){
+  if (score_1==10){
+    SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+    SDL_RenderClear(renderer);
+    score = to_string(score_1) + "  " + to_string(score_2);
+    write(score, WIDTH/2+FONT_SIZE, FONT_SIZE);
+    write("Player 1 Wins!", WIDTH/2+FONT_SIZE+130, FONT_SIZE+300);
+    has_winner = true;
+    return;
+  }
+
+  if (score_2==10){
+    SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+    SDL_RenderClear(renderer);
+    score = to_string(score_1) + "  " + to_string(score_2);
+    write(score, WIDTH/2+FONT_SIZE, FONT_SIZE);
+    write("Player 2 Wins!", WIDTH/2+FONT_SIZE+130, FONT_SIZE+300);
+    has_winner = true;
+    return;
+  }
+
+  serve(player1, player2, ball, turn);
+
 }
 
 
@@ -97,44 +124,75 @@ void render(Pallete *player1, Pallete *player2, Ball *ball){
 
 void update(Pallete *player1, Pallete *player2, Ball *ball, SDL_Renderer *renderer){
 
-  SDL_Rect ball_hitbox = {ball->get_Center().x - ball->get_Radius(), ball->get_Center().y - ball->get_Radius(), ball->get_Radius()*2, ball->get_Radius()*2};
+  // SDL_Rect ball_hitbox = {ball->get_Center().x - ball->get_Radius(), ball->get_Center().y - ball->get_Radius(), ball->get_Radius()*2, ball->get_Radius()*2};
   SDL_Rect player1_hitbox = player1->get_Rect();
   SDL_Rect player2_hitbox = player2->get_Rect();
+  SDL_Rect new_ball_hitbox = {ball->get_Center().x - ball->get_Radius() + ball->get_Velocity_x(), ball->get_Center().y - ball->get_Radius() + ball->get_Velocity_y(), ball->get_Radius()*2, ball->get_Radius()*2};
 
   if(debug){
-  SDL_SetRenderDrawColor(renderer, 0,255,0,255);
-  SDL_RenderFillRect(renderer, &ball_hitbox);
+    SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 0,255,0,255);
+    // SDL_RenderFillRect(renderer, &ball_hitbox);
+    // SDL_RenderFillRect(renderer, &new_ball_hitbox);
+    // SDL_RenderFillRect(renderer, &player1_hitbox);
+    // SDL_RenderFillRect(renderer, &player2_hitbox);
   }
 
-  double VelX = 0;
-  double VelY = 0;
+  if(SDL_HasIntersection(&new_ball_hitbox, &player1_hitbox)){
+    // double rel = (player1_hitbox.y+(player1_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
+    // double norm = rel/(player1_hitbox.h/2);
+    // double bounce = norm*(5*M_PI/2);
+    // cout << "bounce" << bounce << endl;
+    // cout << "cos" << cos(bounce) << endl;
+    // double VelX = -ball->get_Velocity_x()*cos(bounce);
+    // double VelY = ball->get_Velocity_y()*-sin(bounce);
 
-  if(SDL_HasIntersection(&ball_hitbox, &player1_hitbox)){
-    double rel = (player1_hitbox.y+(player1_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
-    double norm = rel/(player1_hitbox.h/2);
-    double bounce = norm*(5*M_PI/2);
-    VelX = ball->get_Velocity_x()*cos(bounce);
-    VelY = ball->get_Velocity_y()*-sin(bounce);
+
+    // cout << VelX << " " << VelY << endl;
+
+    // ball->set_Velocity(VelX, VelY);
+
+    double nie_wiem_co_licze = nie_wiem_co_licze = (new_ball_hitbox.y - (player1_hitbox.y + player1_hitbox.h/2))*0.05;
+
+    cout << nie_wiem_co_licze << endl;
+
+    ball->set_Velocity(-ball->get_Velocity_x()*1.05, nie_wiem_co_licze*1.05);
+
   }
 
-  if(SDL_HasIntersection(&ball_hitbox, &player2_hitbox)){
-    double rel = (player2_hitbox.y+(player2_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
-    double norm = rel/(player2_hitbox.h/2);
-    double bounce = norm*(5*M_PI/2);
-    VelX = -ball->get_Velocity_x()*cos(bounce);
-    VelY = ball->get_Velocity_y()*-sin(bounce);
+  if(SDL_HasIntersection(&new_ball_hitbox, &player2_hitbox)){
+    // double rel = (player2_hitbox.y+(player2_hitbox.h/2))-(ball_hitbox.y+(ball_hitbox.h/2));
+    // double norm = rel/(player2_hitbox.h/2);
+    // double bounce = norm*(5*M_PI/2);
+    // cout << "bounce" << bounce << endl;
+    // cout << "cos" << cos(bounce) << endl;
+    // double VelX = -ball->get_Velocity_x()*cos(bounce);
+    // double VelY = ball->get_Velocity_y()*-sin(bounce);
+    //
+    // cout << VelX << " " << VelY << endl;
+    //
+    // ball->set_Velocity(VelX, VelY);
+    double nie_wiem_co_licze = (new_ball_hitbox.y - (player2_hitbox.y + player2_hitbox.h/2))*0.05;
+
+    cout << nie_wiem_co_licze << endl;
+
+    ball->set_Velocity(-ball->get_Velocity_x()*1.05, nie_wiem_co_licze*1.05);
   }
 
+  // cout << "x" << VelX << endl;
+  // cout << "y" << VelY << endl;
 
   score = to_string(score_1) + "  " + to_string(score_2);
-  if(ball->get_X()==0) {score_1++; serve(player1, player2, ball);}
-  if(ball->get_X() + ball->get_Radius() == WIDTH) {score_2++; serve(player1, player2, ball);}
-  if(ball->get_Y()==0) ball->Bounce_Y();
-  if(ball->get_Y() + ball->get_Radius() == HEIGHT) ball->Bounce_Y();
+  if(ball->get_X() <= 0) {score_2++; check_winner(player1, player2, ball, false); }
+  if(ball->get_X() + ball->get_Radius() >= WIDTH) {score_1++; check_winner(player1, player2, ball, true);}
+  if(ball->get_Y() <= 0) ball->Bounce_Y();
+  if(ball->get_Y() + ball->get_Radius() >= HEIGHT) ball->Bounce_Y();
 
-
-  ball->set_Center({ball->get_Center().x+VelX, ball->get_Center().y+VelY});
-
+  // cout << ball->get_Velocity_x() << " " << ball->get_Velocity_y() << endl;
+  // ball->set_Center({ball->get_Center().x+VelX, ball->get_Center().y+VelY});
+  // ball->set_Velocity(10, 10);
+  ball->Move();
 }
 
 void input(Pallete *player1, Pallete *player2){
@@ -174,8 +232,10 @@ int main(int, char **) {
         frameCount = 0;
       }
 
-      serve(&player1, &player2, &ball);
-      update(&player1, &player2, &ball, renderer);
+      // serve(&player1, &player2, &ball);
+      if (!has_winner){
+        update(&player1, &player2, &ball, renderer);
+      }
       input(&player1, &player2);
       render(&player1, &player2, &ball);
 
