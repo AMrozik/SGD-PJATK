@@ -18,22 +18,21 @@
 
 using namespace std;
 
-int frameCount, timerFPS, lastFrame, fps;
 SDL_Window* window;
 SDL_Renderer* renderer;
 TTF_Font* font;
 SDL_Color color;
+int frameCount, timerFPS, lastFrame, fps;
 
 bool has_winner = false;
-
 bool running;
+bool turn;
 
 SDL_Rect score_board;
 SDL_Rect test1;
 
 string score;
-int score_1=9, score_2=0;
-bool turn;
+int score_1=0, score_2=0;
 
 
 void Intersections(SDL_Rect *ball_hitbox, SDL_Rect *player_hitbox, Ball *ball){
@@ -196,6 +195,6 @@ int main(int, char **) {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    return 0;
 
+    return 0;
 }
