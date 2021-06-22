@@ -35,24 +35,24 @@ string score;
 int score_1=0, score_2=0;
 
 
-void Intersections(SDL_Rect *ball_hitbox, SDL_Rect *player_hitbox, Ball *ball){
+void Intersections(SDL_Rect *ball_hitbox, SDL_Rect *player_hitbox, Ball &ball){
   if(SDL_HasIntersection(ball_hitbox, player_hitbox)){
     double bounce_angle = (ball_hitbox->y - (player_hitbox->y + player_hitbox->h/2))*0.05;
     cout << bounce_angle << endl;
-    ball->set_Velocity(-ball->get_Velocity_x()*1.05, bounce_angle*1.05);
+    ball.set_Velocity(-ball.get_Velocity_x()*1.05, bounce_angle*1.05);
   }
 }
 
 
 
-void serve(Pallete *player1, Pallete *player2, Ball *ball, bool turn){
+void serve(Pallete &player1, Pallete &player2, Ball &ball, bool turn){
   if(turn){
-    ball->set_Center({80, player1->get_Rect().y + player1->get_Rect().h/2});
-    ball->set_Velocity(10, 0);
+    ball.set_Center({80, player1.get_Rect().y + player1.get_Rect().h/2});
+    ball.set_Velocity(10, 0);
   }
   else{
-    ball->set_Center({WIDTH - 60, player2->get_Rect().y+ player1->get_Rect().h/2});
-    ball->set_Velocity(-10, 0);
+    ball.set_Center({WIDTH - 60, player2.get_Rect().y+ player1.get_Rect().h/2});
+    ball.set_Velocity(-10, 0);
   }
 }
 
@@ -76,7 +76,7 @@ void write(string text, int x, int y){
   SDL_RenderCopy(renderer, texture, NULL, &score_board);
 }
 
-void check_winner(Pallete *player1, Pallete *player2, Ball *ball, bool turn){
+void check_winner(Pallete &player1, Pallete &player2, Ball &ball, bool turn){
   if (score_1==10){
     SDL_SetRenderDrawColor(renderer, 0,0,0,0);
     SDL_RenderClear(renderer);
@@ -102,7 +102,7 @@ void check_winner(Pallete *player1, Pallete *player2, Ball *ball, bool turn){
 }
 
 
-void render(Pallete *player1, Pallete *player2, Ball *ball){
+void render(Pallete &player1, Pallete &player2, Ball &ball){
   SDL_SetRenderDrawColor(renderer, 0,0,0,255);
 
   frameCount++;
@@ -113,9 +113,9 @@ void render(Pallete *player1, Pallete *player2, Ball *ball){
 
   SDL_SetRenderDrawColor(renderer, 255,255,255,255);
 
-  player1->Render();
-  player2->Render();
-  ball->Render();
+  player1.Render();
+  player2.Render();
+  ball.Render();
 
   write(score, WIDTH/2+FONT_SIZE, FONT_SIZE);
 
@@ -123,15 +123,15 @@ void render(Pallete *player1, Pallete *player2, Ball *ball){
 }
 
 
-void update(Pallete *player1, Pallete *player2, Ball *ball, SDL_Renderer *renderer){
+void update(Pallete &player1, Pallete &player2, Ball &ball, SDL_Renderer &renderer){
 
-  SDL_Rect player1_hitbox = player1->get_Rect();
-  SDL_Rect player2_hitbox = player2->get_Rect();
-  SDL_Rect new_ball_hitbox = {ball->get_Center().x - ball->get_Radius() + ball->get_Velocity_x(), ball->get_Center().y - ball->get_Radius() + ball->get_Velocity_y(), ball->get_Radius()*2, ball->get_Radius()*2};
+  SDL_Rect player1_hitbox = player1.get_Rect();
+  SDL_Rect player2_hitbox = player2.get_Rect();
+  SDL_Rect new_ball_hitbox = {ball.get_Center().x - ball.get_Radius() + ball.get_Velocity_x(), ball.get_Center().y - ball.get_Radius() + ball.get_Velocity_y(), ball.get_Radius()*2, ball.get_Radius()*2};
 
-  SDL_SetRenderDrawColor(renderer, 0,0,0,0);
-  SDL_RenderClear(renderer);
-  SDL_SetRenderDrawColor(renderer, 0,255,0,255);
+  SDL_SetRenderDrawColor(&renderer, 0,0,0,0);
+  SDL_RenderClear(&renderer);
+  SDL_SetRenderDrawColor(&renderer, 0,255,0,255);
 
 
   Intersections(&new_ball_hitbox, &player1_hitbox, ball);
@@ -139,23 +139,23 @@ void update(Pallete *player1, Pallete *player2, Ball *ball, SDL_Renderer *render
 
 
   score = to_string(score_1) + "  " + to_string(score_2);
-  if(ball->get_X() <= 0) {score_2++; check_winner(player1, player2, ball, false); }
-  if(ball->get_X() + ball->get_Radius() >= WIDTH) {score_1++; check_winner(player1, player2, ball, true);}
-  if(ball->get_Y() <= 0) ball->Bounce_Y();
-  if(ball->get_Y() + ball->get_Radius() >= HEIGHT) ball->Bounce_Y();
+  if(ball.get_X() <= 0) {score_2++; check_winner(player1, player2, ball, false); }
+  if(ball.get_X() + ball.get_Radius() >= WIDTH) {score_1++; check_winner(player1, player2, ball, true);}
+  if(ball.get_Y() < 0) ball.Bounce_Y();
+  if(ball.get_Y() + ball.get_Radius() >= HEIGHT) ball.Bounce_Y();
 
-  ball->Move();
+  ball.Move();
 }
 
-void input(Pallete *player1, Pallete *player2){
+void input(Pallete &player1, Pallete &player2){
   SDL_Event e;
   const Uint8 *keystates = SDL_GetKeyboardState(NULL);
   while(SDL_PollEvent(&e)) if(e.type==SDL_QUIT) running=false;
   if(keystates[SDL_SCANCODE_ESCAPE]) running=false;
-  if(keystates[SDL_SCANCODE_UP]) player2->move_Up();
-  if(keystates[SDL_SCANCODE_DOWN]) player2->move_Down();
-  if(keystates[SDL_SCANCODE_W]) player1->move_Up();
-  if(keystates[SDL_SCANCODE_S]) player1->move_Down();
+  if(keystates[SDL_SCANCODE_UP]) player2.move_Up();
+  if(keystates[SDL_SCANCODE_DOWN]) player2.move_Down();
+  if(keystates[SDL_SCANCODE_W]) player1.move_Up();
+  if(keystates[SDL_SCANCODE_S]) player1.move_Down();
 }
 
 
@@ -185,10 +185,10 @@ int main(int, char **) {
       }
 
       if (!has_winner){
-        update(&player1, &player2, &ball, renderer);
+        update(player1, player2, ball, *renderer);
       }
-      input(&player1, &player2);
-      render(&player1, &player2, &ball);
+      input(player1, player2);
+      render(player1, player2, ball);
     }
 
     TTF_CloseFont(font);
